@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  app-backet-service:
+    container_name: app-backend
+    command: tail -f /dev/null
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    cap_drop:
+      - all
+    build:
+      context: ./
+      target: development
+      dockerfile: ./Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./:/app
+      - ./tests:/app/tests
+      - ./alembic:/app/alembic
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+  postgres:
+    image: postgres:15
+    container_name: app-database
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=user
+      - POSTGRES_USER=password
+      - POSTGRES_DB=gzr-database
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+volumes:
+  postgres: {}
+
+networks:
+  backend:
+    driver: bridge
