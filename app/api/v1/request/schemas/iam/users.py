@@ -1,0 +1,6 @@
+from app.src.iam.application.schemas.users import UserDTOInput, UserDTOOptionalInput
+
+
+class CreateUserRequest(UserDTOInput): ...
+
+class UpdateUserRequest(UserDTOOptionalInput): ...
